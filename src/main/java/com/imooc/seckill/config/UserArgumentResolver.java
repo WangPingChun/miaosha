@@ -23,41 +23,41 @@ import java.util.Optional;
  */
 @Configuration
 public class UserArgumentResolver implements HandlerMethodArgumentResolver {
-    private final UserService userService;
+	private final UserService userService;
 
-    @Autowired
-    public UserArgumentResolver(UserService userService) {
-        this.userService = userService;
-    }
+	@Autowired
+	public UserArgumentResolver(UserService userService) {
+		this.userService = userService;
+	}
 
-    @Override
-    public boolean supportsParameter(MethodParameter methodParameter) {
-        final Class<?> type = methodParameter.getParameterType();
-        return type == User.class;
-    }
+	@Override
+	public boolean supportsParameter(MethodParameter methodParameter) {
+		final Class<?> type = methodParameter.getParameterType();
+		return type == User.class;
+	}
 
-    @Override
-    public Object resolveArgument(MethodParameter methodParameter, ModelAndViewContainer modelAndViewContainer, NativeWebRequest nativeWebRequest, WebDataBinderFactory webDataBinderFactory) throws Exception {
-        final HttpServletRequest request = nativeWebRequest.getNativeRequest(HttpServletRequest.class);
-        final HttpServletResponse response = nativeWebRequest.getNativeResponse(HttpServletResponse.class);
+	@Override
+	public Object resolveArgument(MethodParameter methodParameter, ModelAndViewContainer modelAndViewContainer,
+			NativeWebRequest nativeWebRequest, WebDataBinderFactory webDataBinderFactory) {
+		final HttpServletRequest request = nativeWebRequest.getNativeRequest(HttpServletRequest.class);
+		final HttpServletResponse response = nativeWebRequest.getNativeResponse(HttpServletResponse.class);
+		String token = getCookieValue(request, UserService.COOKIE_NAME_TOKEN);
+		token = token == null ? request.getParameter("token") : token;
+		User user;
+		if (StringUtils.isEmpty(token) || (user = userService.getByToken(response, token)) == null) {
+			return null;
+		}
+		return user;
+	}
 
-        final String token = getCookieValue(request, UserService.COOKIE_NAME_TOKEN);
-        User user;
-        if (StringUtils.isEmpty(token) || (user = userService.getByToken(response, token)) == null) {
-            return null;
-        }
-        return user;
-    }
+	private String getCookieValue(HttpServletRequest request, String cookieNameToken) {
+		final Cookie[] cookies = request.getCookies();
+		if (cookies != null) {
+			final Optional<Cookie> cookieOptional = Arrays.stream(cookies).filter(cookie -> cookieNameToken.equals(cookie.getName()))
+					.findFirst();
+			return cookieOptional.map(Cookie::getValue).orElse(null);
+		}
 
-    private String getCookieValue(HttpServletRequest request, String cookieNameToken) {
-        final Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            final Optional<Cookie> cookieOptional = Arrays.stream(cookies)
-                    .filter(cookie -> cookieNameToken.equals(cookie.getName()))
-                    .findFirst();
-            return cookieOptional.map(Cookie::getValue).orElse(null);
-        }
-
-        return null;
-    }
+		return null;
+	}
 }

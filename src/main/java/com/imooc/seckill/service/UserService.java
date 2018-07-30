@@ -23,57 +23,57 @@ import static com.imooc.seckill.result.CodeMsg.*;
  */
 @Service
 public class UserService {
-    private final UserDao userDao;
-    private final RedisService redisService;
-    public static final String COOKIE_NAME_TOKEN = "token";
+	private final UserDao userDao;
+	private final RedisService redisService;
+	public static final String COOKIE_NAME_TOKEN = "token";
 
-    @Autowired
-    public UserService(UserDao userDao, RedisService redisService) {
-        this.userDao = userDao;
-        this.redisService = redisService;
-    }
+	@Autowired
+	public UserService(UserDao userDao, RedisService redisService) {
+		this.userDao = userDao;
+		this.redisService = redisService;
+	}
 
-    public boolean login(HttpServletResponse response, LoginVO loginVO) {
-        if (loginVO == null) {
-            throw new GlobalException(SERVER_ERROR);
-        }
-        final String mobile = loginVO.getMobile();
-        final String password = loginVO.getPassword();
-        final User user = userDao.getById(Long.parseLong(mobile));
-        if (user == null) {
-            throw new GlobalException(MOBILE_NOT_EXIST);
-        }
-        // 验证密码
-        final String userPassword = user.getPassword();
-        final String salt = user.getSalt();
-        if (!MD5Utils.dbPassword(password, salt).equals(userPassword)) {
-            throw new GlobalException(PASSWORD_ERROR);
-        }
+	public String login(HttpServletResponse response, LoginVO loginVO) {
+		if (loginVO == null) {
+			throw new GlobalException(SERVER_ERROR);
+		}
+		final String mobile = loginVO.getMobile();
+		final String password = loginVO.getPassword();
+		final User user = userDao.getById(Long.parseLong(mobile));
+		if (user == null) {
+			throw new GlobalException(MOBILE_NOT_EXIST);
+		}
+		// 验证密码
+		final String userPassword = user.getPassword();
+		final String salt = user.getSalt();
+		if (!MD5Utils.md5Password(password, salt).equals(userPassword)) {
+			throw new GlobalException(PASSWORD_ERROR);
+		}
 
-        // 生成cookie
-        final String token = UUIDUtils.uuid();
-        addCookie(response, token, user);
-        return true;
-    }
+		// 生成cookie
+		final String token = UUIDUtils.uuid();
+		addCookie(response, token, user);
+		return token;
+	}
 
-    private void addCookie(HttpServletResponse response, String token, User user) {
-        redisService.set(UserKey.token, token, user);
+	private void addCookie(HttpServletResponse response, String token, User user) {
+		redisService.set(UserKey.token, token, user);
 
-        Cookie cookie = new Cookie(COOKIE_NAME_TOKEN, token);
-        cookie.setMaxAge(UserKey.token.expireSeconds());
-        cookie.setPath("/");
-        response.addCookie(cookie);
-    }
+		Cookie cookie = new Cookie(COOKIE_NAME_TOKEN, token);
+		cookie.setMaxAge(UserKey.token.expireSeconds());
+		cookie.setPath("/");
+		response.addCookie(cookie);
+	}
 
-    public User getByToken(HttpServletResponse response, String token) {
-        if (StringUtils.isEmpty(token)) {
-            return null;
-        }
-        // 延长有效期
-        final User user = redisService.get(UserKey.token, token, User.class);
-        if (user != null) {
-            addCookie(response, token, user);
-        }
-        return user;
-    }
+	public User getByToken(HttpServletResponse response, String token) {
+		if (StringUtils.isEmpty(token)) {
+			return null;
+		}
+		// 延长有效期
+		final User user = redisService.get(UserKey.token, token, User.class);
+		if (user != null) {
+			addCookie(response, token, user);
+		}
+		return user;
+	}
 }

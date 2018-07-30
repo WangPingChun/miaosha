@@ -15,12 +15,12 @@ public class MD5Utils {
     }
 
 
-    private static String md5Password(String pass) {
+    public static String md5Password(String pass) {
         final String passSalt = SALT.charAt(0) + SALT.charAt(2) + pass + SALT.charAt(1) + SALT.charAt(3);
         return md5(passSalt);
     }
 
-    private static String md5Password(String pass, String salt) {
+    public static String md5Password(String pass, String salt) {
         final String passSalt = salt.charAt(0) + salt.charAt(2) + pass + salt.charAt(1) + salt.charAt(3);
         return md5(passSalt);
     }
