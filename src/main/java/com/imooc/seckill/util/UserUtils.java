@@ -56,7 +56,7 @@ public class UserUtils {
 
 
 		String loginUrl = "http://localhost:8080/login";
-		File file = new File("D:/token.txt");
+		File file = new File("/Users/chris/token.txt");
 		if (file.exists()) {
 			file.delete();
 		}
@@ -94,6 +94,7 @@ public class UserUtils {
 			System.out.println("write to file : " + user.getId());
 		}
 		raf.close();
+
 
 		System.out.println("over");
 	}

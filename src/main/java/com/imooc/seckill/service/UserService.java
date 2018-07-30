@@ -23,57 +23,96 @@ import static com.imooc.seckill.result.CodeMsg.*;
  */
 @Service
 public class UserService {
-	private final UserDao userDao;
-	private final RedisService redisService;
-	public static final String COOKIE_NAME_TOKEN = "token";
+    private final UserDao userDao;
+    private final RedisService redisService;
+    public static final String COOKIE_NAME_TOKEN = "token";
 
-	@Autowired
-	public UserService(UserDao userDao, RedisService redisService) {
-		this.userDao = userDao;
-		this.redisService = redisService;
-	}
+    @Autowired
+    public UserService(UserDao userDao, RedisService redisService) {
+        this.userDao = userDao;
+        this.redisService = redisService;
+    }
 
-	public String login(HttpServletResponse response, LoginVO loginVO) {
-		if (loginVO == null) {
-			throw new GlobalException(SERVER_ERROR);
-		}
-		final String mobile = loginVO.getMobile();
-		final String password = loginVO.getPassword();
-		final User user = userDao.getById(Long.parseLong(mobile));
-		if (user == null) {
-			throw new GlobalException(MOBILE_NOT_EXIST);
-		}
-		// 验证密码
-		final String userPassword = user.getPassword();
-		final String salt = user.getSalt();
-		if (!MD5Utils.md5Password(password, salt).equals(userPassword)) {
-			throw new GlobalException(PASSWORD_ERROR);
-		}
+    public String login(HttpServletResponse response, LoginVO loginVO) {
+        if (loginVO == null) {
+            throw new GlobalException(SERVER_ERROR);
+        }
+        final String mobile = loginVO.getMobile();
+        final String password = loginVO.getPassword();
+        final User user = getById(Long.parseLong(mobile));
+        if (user == null) {
+            throw new GlobalException(MOBILE_NOT_EXIST);
+        }
+        // 验证密码
+        final String userPassword = user.getPassword();
+        final String salt = user.getSalt();
+        if (!MD5Utils.md5Password(password, salt).equals(userPassword)) {
+            throw new GlobalException(PASSWORD_ERROR);
+        }
 
-		// 生成cookie
-		final String token = UUIDUtils.uuid();
-		addCookie(response, token, user);
-		return token;
-	}
+        // 生成cookie
+        final String token = UUIDUtils.uuid();
+        addCookie(response, token, user);
+        return token;
+    }
 
-	private void addCookie(HttpServletResponse response, String token, User user) {
-		redisService.set(UserKey.token, token, user);
+    private void addCookie(HttpServletResponse response, String token, User user) {
+        redisService.set(UserKey.token, token, user);
 
-		Cookie cookie = new Cookie(COOKIE_NAME_TOKEN, token);
-		cookie.setMaxAge(UserKey.token.expireSeconds());
-		cookie.setPath("/");
-		response.addCookie(cookie);
-	}
+        Cookie cookie = new Cookie(COOKIE_NAME_TOKEN, token);
+        cookie.setMaxAge(UserKey.token.expireSeconds());
+        cookie.setPath("/");
+        response.addCookie(cookie);
+    }
 
-	public User getByToken(HttpServletResponse response, String token) {
-		if (StringUtils.isEmpty(token)) {
-			return null;
-		}
-		// 延长有效期
-		final User user = redisService.get(UserKey.token, token, User.class);
-		if (user != null) {
-			addCookie(response, token, user);
-		}
-		return user;
-	}
+    public User getById(Long id) {
+        User user = redisService.get(UserKey.getById, String.valueOf(id), User.class);
+
+        if (user == null) {
+            user = userDao.getById(id);
+            if (user == null) {
+                throw new GlobalException(MOBILE_NOT_EXIST);
+            }
+            redisService.set(UserKey.getById, String.valueOf(id), user);
+        }
+
+        return user;
+    }
+
+    public User getByToken(HttpServletResponse response, String token) {
+        if (StringUtils.isEmpty(token)) {
+            return null;
+        }
+        // 延长有效期
+        final User user = redisService.get(UserKey.token, token, User.class);
+        if (user != null) {
+            addCookie(response, token, user);
+        }
+        return user;
+    }
+
+    public boolean updatePasswd(long id, String token, String passwd) {
+        final User user = getById(id);
+        if (user == null) {
+            throw new GlobalException(MOBILE_NOT_EXIST);
+        }
+
+        User toBeUpdateUser = new User();
+        toBeUpdateUser.setId(id);
+        toBeUpdateUser.setPassword(MD5Utils.md5Password(passwd, user.getSalt()));
+
+        if (userDao.update(toBeUpdateUser) >= 1) {
+            redisService.delete(UserKey.getById, String.valueOf(id));
+            redisService.delete(UserKey.token, String.valueOf(id));
+
+            user.setPassword(passwd);
+
+            redisService.set(UserKey.token, token, user);
+        } else {
+            return false;
+        }
+
+
+        return true;
+    }
 }

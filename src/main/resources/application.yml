@@ -11,7 +11,7 @@ spring:
       filters: stat
       max-active: 1000
       initial-size: 100
-      max-wait: 60000
+      max-wait: 30000
       min-idle: 100
       time-between-eviction-runs-millis: 60000
       min-evictable-idle-time-millis: 300000
@@ -32,14 +32,14 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
     default-fetch-size: 100
-    default-statement-timeout: 30
+    default-statement-timeout: 60
 
 ### redis
 redis:
   host: 101.132.47.22
   port: 6379
-  timeout: 30
+  timeout: 100000
   password: wang1991
-  max-active: 1000
-  max-idle: 500
-  max-wait: 500
+  max-active: 10000
+  max-idle: 2000
+  max-wait: 100000

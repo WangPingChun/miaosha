@@ -87,6 +87,8 @@ public class RedisService {
             jedis = jedisPool.getResource();
             final String value = jedis.get(prefix.getPerfix() + key);
             return stringToBean(value, clazz);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         } finally {
             close(jedis);
         }
@@ -118,6 +120,23 @@ public class RedisService {
             }
 
             return true;
+        } finally {
+            close(jedis);
+        }
+    }
+
+    /**
+     * 删除
+     *
+     * @param prefix
+     * @param key
+     * @return
+     */
+    public boolean delete(KeyPrefix prefix, String key) {
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
+            return jedis.del(prefix.getPerfix() + key) >= 1;
         } finally {
             close(jedis);
         }

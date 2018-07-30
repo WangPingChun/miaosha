@@ -33,7 +33,7 @@ public class GlobalExceptionHandler {
             final String defaultMessage = objectError.getDefaultMessage();
             return Result.error(CodeMsg.BIND_ERROR.fillArgs(defaultMessage));
         } else {
-            log.error(e.getCause().getMessage());
+            log.error(e.toString());
             return Result.error(CodeMsg.SERVER_ERROR);
         }
     }
