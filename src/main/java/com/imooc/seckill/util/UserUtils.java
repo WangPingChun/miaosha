@@ -38,25 +38,26 @@ public class UserUtils {
 
 		// 插入数据库
 
-//		Connection conn = DBUtils.getConn();
-//		String sql = "insert into seckill_user(login_count, nickname, register_date, salt, password, id)values(?,?,?,?,?,?)";
-//		PreparedStatement pstmt = conn.prepareStatement(sql);
-//		for (User user : userList) {
-//			pstmt.setInt(1, user.getLoginCount());
-//			pstmt.setString(2, user.getNickname());
-//			pstmt.setTimestamp(3, new Timestamp(user.getRegisterDate().getTime()));
-//			pstmt.setString(4, user.getSalt());
-//			pstmt.setString(5, user.getPassword());
-//			pstmt.setLong(6, user.getId());
-//			pstmt.addBatch();
-//		}
-//		pstmt.executeBatch();
-//		pstmt.close();
-//		conn.close();
+		//		Connection conn = DBUtils.getConn();
+		//		String sql = "insert into seckill_user(login_count, nickname, register_date, salt, password, id)values(?,?,?,?,?,?)";
+		//		PreparedStatement pstmt = conn.prepareStatement(sql);
+		//		for (User user : userList) {
+		//			pstmt.setInt(1, user.getLoginCount());
+		//			pstmt.setString(2, user.getNickname());
+		//			pstmt.setTimestamp(3, new Timestamp(user.getRegisterDate().getTime()));
+		//			pstmt.setString(4, user.getSalt());
+		//			pstmt.setString(5, user.getPassword());
+		//			pstmt.setLong(6, user.getId());
+		//			pstmt.addBatch();
+		//		}
+		//		pstmt.executeBatch();
+		//		pstmt.close();
+		//		conn.close();
 
 
-		String loginUrl = "http://localhost:8080/login";
-		File file = new File("/Users/chris/token.txt");
+		String loginUrl = "http://localhost/login";
+		//		File file = new File("/Users/chris/token.txt");
+		File file = new File("D:/token.txt");
 		if (file.exists()) {
 			file.delete();
 		}
@@ -70,7 +71,7 @@ public class UserUtils {
 			connection.setRequestMethod("POST");
 			connection.setDoOutput(true);
 			OutputStream out = connection.getOutputStream();
-			String params = "mobile=" + user.getId() + "&password=" + MD5Utils.md5Password("123456");
+			String params = "mobile=" + user.getId() + "&password=123456";
 			out.write(params.getBytes());
 			out.flush();
 			InputStream inputStream = connection.getInputStream();

@@ -10,33 +10,41 @@ import org.apache.ibatis.annotations.*;
  */
 @Mapper
 public interface OrderDao {
-    /**
-     * 根据用户id和商品id查询秒杀订单.
-     *
-     * @param userId  用户id
-     * @param goodsId 商品id
-     * @return 秒杀订单
-     */
-    @Select("select * from seckill_order where user_id = #{userId} and goods_id = #{goodsId};")
-    SeckillOrder getSeckillOrderByUserIdAndGoodsId(@Param("userId") Long userId, @Param("goodsId") Long goodsId);
+	/**
+	 * 根据用户id和商品id查询秒杀订单.
+	 *
+	 * @param userId  用户id
+	 * @param goodsId 商品id
+	 * @return 秒杀订单
+	 */
+	@Select("select * from seckill_order where user_id = #{userId} and goods_id = #{goodsId};")
+	SeckillOrder getSeckillOrderByUserIdAndGoodsId(@Param("userId") Long userId, @Param("goodsId") Long goodsId);
 
-    /**
-     * 新增订单.
-     *
-     * @param orderInfo 订单详情
-     * @return 订单id
-     */
-    @SelectKey(keyColumn = "id", keyProperty = "id", resultType = long.class, before = false, statement = "select last_insert_id()")
-    @Insert("insert into order_info(user_id, goods_id, goods_name, goods_count, goods_price, order_channel, status, create_date)values(" +
-            "#{userId},#{goodsId},#{goodsName},#{goodsCount},#{goodsPrice},#{orderChannel},#{status},#{createDate}) ")
-    long saveOrderInfo(OrderInfo orderInfo);
+	/**
+	 * 新增订单.
+	 *
+	 * @param orderInfo 订单详情
+	 * @return 订单id
+	 */
+	@SelectKey(keyColumn = "id", keyProperty = "id", resultType = long.class, before = false, statement = "select last_insert_id()")
+	@Insert("insert into order_info(user_id, goods_id, goods_name, goods_count, goods_price, order_channel, status, create_date)values("
+			+ "#{userId},#{goodsId},#{goodsName},#{goodsCount},#{goodsPrice},#{orderChannel},#{status},#{createDate}) ")
+	long saveOrderInfo(OrderInfo orderInfo);
 
-    /**
-     * 新增秒杀订单.
-     *
-     * @param seckillOrder 秒杀订单
-     * @return 影响的行数
-     */
-    @Insert("insert into seckill_order(user_id, order_id, goods_id) VALUES (#{userId},#{orderId},#{goodsId})")
-    int saveSeckillOrder(SeckillOrder seckillOrder);
+	/**
+	 * 新增秒杀订单.
+	 *
+	 * @param seckillOrder 秒杀订单
+	 * @return 影响的行数
+	 */
+	@Insert("insert into seckill_order(user_id, order_id, goods_id) VALUES (#{userId},#{orderId},#{goodsId})")
+	int saveSeckillOrder(SeckillOrder seckillOrder);
+
+	/**
+	 * 根据订单id查询订单信息.
+	 * @param orderId 订单id
+	 * @return 订单信息
+	 */
+	@Select("select * from order_info where id = #{orderId}")
+	OrderInfo getOrderById(Long orderId);
 }

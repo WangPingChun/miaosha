@@ -16,6 +16,5 @@ public class LoginVO {
     @Mobile
     private String mobile;
     @NotNull
-    @Length(min = 32)
     private String password;
 }
