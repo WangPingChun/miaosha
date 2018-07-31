@@ -33,8 +33,25 @@ spring:
       pool-prepared-statements: true
       max-open-prepared-statements: 20
       driver-class-name: com.mysql.jdbc.Driver
-
-
+  rabbitmq:
+    host: 118.24.105.155
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    listener:
+      simple:
+        concurrency: 10
+        max-concurrency: 10
+        prefetch: 1
+        auto-startup: true
+        default-requeue-rejected: true
+    template:
+      retry:
+        enabled: true
+        initial-interval: 1000
+        max-attempts: 3
+        multiplier: 1.5
 
 ### mybatis
 mybatis:

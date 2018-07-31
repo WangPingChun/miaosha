@@ -8,9 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -56,8 +53,8 @@ public class UserUtils {
 
 
 		String loginUrl = "http://localhost/login";
-		//		File file = new File("/Users/chris/token.txt");
-		File file = new File("D:/token.txt");
+				File file = new File("/Users/chris/token.txt");
+//		File file = new File("D:/token.txt");
 		if (file.exists()) {
 			file.delete();
 		}

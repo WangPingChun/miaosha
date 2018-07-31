@@ -57,7 +57,7 @@ public class OrderService {
 
 		SeckillOrder seckillOrder = new SeckillOrder();
 		seckillOrder.setUserId(user.getId());
-		seckillOrder.setOrderId(orderId);
+		seckillOrder.setOrderId(orderInfo.getId());
 		seckillOrder.setGoodsId(goods.getId());
 
 		orderDao.saveSeckillOrder(seckillOrder);
